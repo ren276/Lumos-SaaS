@@ -1,29 +1,110 @@
-# Create T3 App
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+# Lumos - Full Stack AI GitHub SaaS
 
-## What's next? How do I make an app with this?
+Build and Deploy a full-stack AI-powered GitHub SaaS platform using **Next.js 15**, **Google Gemini AI**, **Assembly AI**, **Stripe**, **Clerk**, and **Supabase**.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## ✨ Features
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+- AI-Powered **Code Summarization** with Google Gemini AI
+- **Audio Transcription** using Assembly AI
+- **Authentication** with Clerk
+- **Subscription Payments** powered by Stripe
+- **Credit-Based System** for user operations
+- Modern and responsive **UI/UX** with Tailwind CSS and Shadcn UI
+- **Database** management via Prisma and Supabase
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+## 🚀 Tech Stack
 
-## Learn More
+- **Frontend**: Next.js 15, React, Tailwind CSS, Shadcn UI
+- **Backend**: TypeScript, Prisma, Supabase
+- **Authentication**: Clerk
+- **Payments**: Stripe
+- **AI Integrations**: Google Gemini AI, Assembly AI
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+## 🛠️ Getting Started
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+### Prerequisites
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+- Node.js >= 18
+- npm or yarn
+- Supabase account
+- Clerk account
+- Stripe account
+- Google Gemini AI API Key
+- Assembly AI API Key
 
-## How do I deploy this?
+### Installation
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+1. **Clone the repository:**
+
+```bash
+git clone https://github.com/yourusername/full-stack-ai-github-saas.git
+cd full-stack-ai-github-saas
+```
+
+2. **Install dependencies:**
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. **Create a `.env` file** and add the following environment variables:
+
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+DATABASE_URL=your_supabase_database_url
+GEMINI_API_KEY=your_google_gemini_api_key
+ASSEMBLYAI_API_KEY=your_assemblyai_api_key
+```
+
+4. **Set up Prisma and the database:**
+
+```bash
+npx prisma migrate dev --name init
+```
+
+5. **Start the development server:**
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+Open your browser and navigate to `http://localhost:3000` to view the app.
+
+## 📄 Usage
+
+- **Authentication**: Sign up or log in using Clerk
+- **Connect GitHub**: Link your repositories
+- **Generate Summaries**: Summarize codebases with Gemini AI
+- **Upload Audio**: Transcribe meetings via Assembly AI
+- **Manage Plans**: Subscribe to premium plans using Stripe
+
+## ⚡ Deployment
+
+You can easily deploy this app on platforms like **Vercel**, **Netlify**, or **Railway**.
+
+Make sure to correctly set all environment variables on your deployment platform.
+
+## 📜 License
+
+This project is licensed under the **MIT License**.  
+See the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgements
+
+- [Next.js](https://nextjs.org/)
+- [Google Gemini AI](https://ai.google.dev/)
+- [Assembly AI](https://www.assemblyai.com/)
+- [Clerk](https://clerk.dev/)
+- [Stripe](https://stripe.com/)
+- [Supabase](https://supabase.com/)
+- [Prisma ORM](https://www.prisma.io/)
+
+---
