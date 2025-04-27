@@ -1,6 +1,6 @@
 {
     "functions": {
-      "api/process-meeting": {
+      "src/app/api/process-meeting": {
         "maxDuration": 60
       }
     }
