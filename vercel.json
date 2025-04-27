@@ -1,0 +1,7 @@
+{
+    "functions": {
+      "api/process-meeting": {
+        "maxDuration": 60
+      }
+    }
+  }
