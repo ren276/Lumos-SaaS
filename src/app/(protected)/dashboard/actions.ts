@@ -7,7 +7,7 @@
 import { streamText } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { generateEmbedding } from "~/lib/gemini";
+import { batchGenerateEmbedding } from "~/lib/gemini";
 import { db } from "~/server/db";
 
 const google = createGoogleGenerativeAI({
@@ -17,7 +17,7 @@ const google = createGoogleGenerativeAI({
 export async function askQuestion(question: string, projectId: string) {
   const stream = createStreamableValue();
 
-  const queryVector = await generateEmbedding(question);
+  const queryVector = await batchGenerateEmbedding([question]);
   const vectorQuery = `[${queryVector.join(",")}]`;
 
   const result = await db.$queryRaw`

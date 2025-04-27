@@ -20,6 +20,7 @@ import { readStreamableValue } from "ai/rsc";
 import CodeReferences from "./code-references";
 import { toast } from "sonner";
 import { api } from "~/trpc/react";
+import useRefetch from "~/hooks/use-refetch";
 
 const AskQuestionCard = () => {
   const { project } = useProject();
@@ -30,7 +31,7 @@ const AskQuestionCard = () => {
     { fileName: string; sourceCode: string; summary: string }[]
   >([]);
   const [answer, setAnswer] = React.useState("");
-  const saveAnswer = api.project.saveAnswer.useMutation()
+  const saveAnswer = api.project.saveAnswer.useMutation();
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setAnswer("");
@@ -38,7 +39,6 @@ const AskQuestionCard = () => {
     e.preventDefault();
     if (!project?.id) return;
     setLoading(true);
-    
 
     const { output, filesReferences } = await askQuestion(question, project.id);
     setOpen(true);
@@ -51,43 +51,52 @@ const AskQuestionCard = () => {
     }
     setLoading(false);
   };
+  const refetch = useRefetch()
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[80vw]">
           <DialogHeader>
             <div className="flex items-center gap-2">
-            <DialogTitle>
-              <Image src="/lumos.png" alt="lumos" width={40} height={40} />
-            </DialogTitle>
-            <Button disabled={saveAnswer.isPending} variant='outline' onClick={() =>{
-              saveAnswer.mutate({
-                projectId: project!.id,
-                question,
-                answer,
-                fileReferences
-              },{
-                onSuccess: () => {
-                  toast.success('Answer saved!')
-                },
-                onError: () => {
-                  toast.error('Failed to save answer')
-                }
-              })
-            }}>Save Answer</Button>
+              <DialogTitle>
+                <Image src="/lumos.png" alt="lumos" width={40} height={40} />
+              </DialogTitle>
+              <Button
+                disabled={saveAnswer.isPending}
+                variant="outline"
+                onClick={() => {
+                  saveAnswer.mutate(
+                    {
+                      projectId: project!.id,
+                      question,
+                      answer,
+                      filesReferences,
+                    },
+                    {
+                      onSuccess: () => {
+                        toast.success("Answer saved!");
+                        refetch()
+                      },
+                      onError: () => {
+                        toast.error("Failed to save answer");
+                      },
+                    },
+                  );
+                }}
+              >
+                Save Answer
+              </Button>
             </div>
-
           </DialogHeader>
           <WDEditor.Markdown
             source={answer}
-            className=" max-w-[70vw] !h-full max-h-[40vh] overflow-scroll"
+            className="!h-full max-h-[40vh] max-w-[70vw] overflow-scroll"
           />
           <div className="h-4"></div>
-          <CodeReferences fileReferences={filesReferences} />
+          <CodeReferences filesReferences={filesReferences} />
 
           <Button
             type="button"
-            
             onClick={() => {
               setOpen(false);
             }}
@@ -108,7 +117,9 @@ const AskQuestionCard = () => {
               onChange={(e) => setQuestion(e.target.value)}
             ></Textarea>
             <div className="h-4"></div>
-            <Button type="submit" disabled={loading}>Ask Lumos!</Button>
+            <Button type="submit" disabled={loading}>
+              Ask Lumos!
+            </Button>
           </form>
         </CardContent>
       </Card>

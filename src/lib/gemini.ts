@@ -49,11 +49,22 @@ It is given only as an example of appropriate comments.`,
 };
 
 export async function batchSummariseCode(docs: Document[]) {
-  console.log("getting summaries for", docs.map((doc) => doc.metadata.source));
-  try {
-    const prompts = docs.map((doc) => {
-      const code = doc.pageContent.slice(0, 10000);
-      return `You are an intelligent senior software engineer who specialises in onboarding junior software engineers onto projects.
+  console.log("Getting summaries for", docs.length, "documents");
+  const summaries: (string | null)[] = new Array(docs.length).fill(null);
+  
+  // Process in smaller batches to avoid API limits
+  const batchSize = 5;
+  
+  for (let i = 0; i < docs.length; i += batchSize) {
+    const batch = docs.slice(i, i + batchSize);
+    console.log(`Processing batch ${Math.floor(i/batchSize) + 1} of ${Math.ceil(docs.length/batchSize)}`);
+    
+    await Promise.all(batch.map(async (doc, batchIndex) => {
+      const index = i + batchIndex;
+      
+      try {
+        const code = doc.pageContent.slice(0, 10000);
+        const prompt = `You are an intelligent senior software engineer who specialises in onboarding junior software engineers onto projects.
 
 You are onboarding a junior software engineer and explaining to them the purpose of the ${doc.metadata.source} file
 
@@ -63,51 +74,57 @@ ${code}
 ---
 
 Give a summary no more than 100 words of the code above.`;
-    });
 
-    const response = await model.generateContent(prompts);
-    const summaries = response.response?.candidates?.map(
-      (candidate) => candidate.content?.parts?.[0]?.text?.trim()
-    );
-
-    if (!summaries || summaries.length !== docs.length) {
-      console.warn("Could not generate summaries for all documents.");
-      return docs.map(() => null); // Return an array of nulls for failed summaries
-    }
-
-    return summaries.map((summary, index) => {
-      if (!summary || summary.length < 10) {
-        console.warn("Empty or invalid summary for:", docs[index].metadata.source);
-        return null;
+        const response = await model.generateContent(prompt);
+        const summary = response.response.text().trim();
+        
+        if (summary && summary.length > 10) {
+          summaries[index] = summary;
+          console.log(`✅ Summary generated for ${doc.metadata.source}`);
+        } else {
+          console.warn(`⚠️ Empty or invalid summary for: ${doc.metadata.source}`);
+          // Add a fallback summary
+          summaries[index] = `This is the ${doc.metadata.source} file.`;
+        }
+      } catch (err) {
+        console.error(`Error summarizing document ${doc.metadata.source}:`, err);
+        // Add a fallback summary
+        summaries[index] = `This is the ${doc.metadata.source} file.`;
       }
-      return summary;
-    });
-  } catch (error) {
-    console.error("Error summarizing multiple documents:", error);
-    return docs.map(() => null);
+    }));
+    
+    // Add a small delay between batches to avoid rate limits
+    if (i + batchSize < docs.length) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
   }
-} 
-
-export async function generateEmbedding(summary: string) {
-  const model = genAI.getGenerativeModel({
-    model: "text-embedding-004",
-  });
-  const result = await model.embedContent(summary);
-  const embedding = result.embedding;
-  return embedding.values;
+  
+  console.log("Summary generation complete. Generated:", summaries.filter(Boolean).length, "of", docs.length);
+  return summaries;
 }
 
-export async function batchGenerateEmbeddings(summaries: string[]) {
+
+export async function batchGenerateEmbedding(summaries: string[]) {
   try {
-    const result = await embeddingModel.embedContent(summaries);
-    const embeddings = result.embeddings?.map((embeddingResult) => embeddingResult.values);
-
-    if (!embeddings || embeddings.length !== summaries.length) {
-      console.warn("Could not generate embeddings for all summaries.");
-      return summaries.map(() => null); // Return an array of nulls for failed embeddings
-    }
-
-    return embeddings;
+    // Create the embedding model
+    const embeddingModel = genAI.getGenerativeModel({
+      model: "text-embedding-004",
+    });
+    
+    const results = await Promise.all(
+      summaries.map(async (summary) => {
+        if (!summary) return null;
+        try {
+          const result = await embeddingModel.embedContent(summary);
+          return result.embedding.values;
+        } catch (err) {
+          console.warn(`Error embedding summary: ${err}`);
+          return null;
+        }
+      })
+    );
+    
+    return results;
   } catch (error) {
     console.error("Error generating embeddings for multiple summaries:", error);
     return summaries.map(() => null);
