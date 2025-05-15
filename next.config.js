@@ -6,6 +6,11 @@ import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
 const config = {
+    "functions": {
+    "api/process-meeting.js": {
+      "maxDuration": 60
+    }
+  },
     eslint: {
        ignoreDuringBuilds: true, 
     },
